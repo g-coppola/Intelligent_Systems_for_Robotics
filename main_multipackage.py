@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from matplotlib.colors import ListedColormap
 
 # ============================================================================
@@ -119,11 +120,13 @@ class DroneEnvMultiReturn:
                 
         display_grid[self.drone_pos[0], self.drone_pos[1]] = DRONE
 
+        # Colori: 0=white, 1=Ostacolo, 2=Depot, 3=Target, 4=Charger, 5=Drone
         cmap = ListedColormap(["white", "#555555", "#2196F3", "#4CAF50", "#FF9800", "#E91E63"])
 
         if self._fig is None:
             plt.ion()
-            self._fig, self._ax = plt.subplots(figsize=(6, 6))
+            # Finestra allargata per fare spazio alla legenda
+            self._fig, self._ax = plt.subplots(figsize=(8, 6))
             self._fig.canvas.manager.set_window_title("Live Simulation")
 
         self._ax.clear()
@@ -132,6 +135,19 @@ class DroneEnvMultiReturn:
         for x in range(self.grid_size + 1):
             self._ax.axhline(x - 0.5, color="gray", linewidth=0.5)
             self._ax.axvline(x - 0.5, color="gray", linewidth=0.5)
+
+        # --- AGGIUNTA DELLA LEGENDA ---
+        legend_elements = [
+            mpatches.Patch(facecolor='#555555', edgecolor='black', label='Ostacolo'),
+            mpatches.Patch(facecolor='#2196F3', edgecolor='black', label='Base (Depot)'),
+            mpatches.Patch(facecolor='#4CAF50', edgecolor='black', label='Pacco (Target)'),
+            mpatches.Patch(facecolor='#FF9800', edgecolor='black', label='Ricarica'),
+            mpatches.Patch(facecolor='#E91E63', edgecolor='black', label='Drone')
+        ]
+        
+        # Posiziona la legenda fuori dalla griglia, sulla destra
+        self._ax.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1.05, 0.5), fontsize=10)
+        # ------------------------------
 
         p_status = sum(self.collected)
         self._ax.set_title(f"Step {step} | Batt {self.battery}/{self.max_battery} | Pacchi {p_status}/3", fontsize=11)
